@@ -1,6 +1,6 @@
 #Reborn - yet another fast distributed solution for Redis
 
-Reborn is a proxy based high performance Redis cluster solution written in Go/C, an alternative to Twemproxy.
+Reborn is a proxy based high performance Redis cluster solution written in Go/C, an alternative to Redis.
 
 Reborn supports multiple stateless proxy with multiple redis instances.
 
@@ -12,6 +12,7 @@ Reborn is engineered to elastically scale, Easily add or remove redis or proxy i
 * Auto rebalance
 * Extremely simple to use 
 * Support both redis or rocksdb transparently
+* Support cold/hot data hybrid management.
 * GUI dashboard & admin tools 
 * Supports most of Redis commands, Fully compatible with twemproxy(https://github.com/twitter/twemproxy)
 * Native Redis clients are supported
@@ -29,12 +30,12 @@ Reborn is engineered to elastically scale, Easily add or remove redis or proxy i
 
 * Install go(we recommend go1.3.3, go1.4 has some performance issue) & ZooKeeper
 * Install godep, `go get github.com/tools/godep` 
-* go get github.com/reborndb/reborn
+* `go get github.com/reborndb/reborn`
 * cd reborn
 * make
 * make gotest
 * cd sample
-* follow instructions in usage.md
+* follow instructions in [usage.md](sample/usage.md)
 
 ## Tutorial
 
@@ -114,7 +115,7 @@ Result:
 
 ## For Java users who want to support HA
 
-[Jodis \(HA Reborn Connection Pool based on Jedis\)](extern/jodis)
+[Reborn-java \(HA Reborn Connection Pool based on Jedis\)](https://github.com/reborndb/reborn-java)
 
 ## Architecture
 

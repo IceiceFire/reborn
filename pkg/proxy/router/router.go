@@ -21,6 +21,7 @@ import (
 	"github.com/juju/errors"
 	stats "github.com/ngaut/gostats"
 	"github.com/ngaut/log"
+	"github.com/reborndb/go/errors2"
 	"github.com/reborndb/reborn/pkg/models"
 	"github.com/reborndb/reborn/pkg/proxy/group"
 	"github.com/reborndb/reborn/pkg/proxy/parser"
@@ -232,7 +233,7 @@ func (s *Server) sendBack(c *session, op []byte, keys [][]byte, resp *parser.Res
 
 func (s *Server) handleAuthCommand(opstr string, auth []byte) ([]byte, error) {
 	if string(auth) != s.conf.ProxyAuth {
-		return []byte("-ERR invalid auth"), errors.Errorf("invalid auth")
+		return []byte("-ERR invalid auth\r\n"), errors.Errorf("invalid auth")
 	}
 
 	return OK_BYTES, nil
@@ -253,7 +254,7 @@ func (s *Server) redisTunnel(c *session) error {
 		c.authenticated = (err == nil)
 		return errors.Trace(err)
 	} else if len(s.conf.ProxyAuth) > 0 && !c.authenticated {
-		buf := []byte("-ERR NOAUTH Authentication required")
+		buf := []byte("-ERR NOAUTH Authentication required\r\n")
 		s.sendBack(c, op, keys, resp, buf)
 		return errors.Errorf("NOAUTH Authentication required")
 	}
@@ -331,7 +332,7 @@ func (s *Server) handleConn(c net.Conn) {
 	var err error
 	defer func() {
 		client.closeSignal.Wait() //waiting for writer goroutine
-		if errors.Cause(err) != io.EOF {
+		if errors2.ErrorNotEqual(err, io.EOF) {
 			log.Warningf("close connection %v, %v", client, errors.ErrorStack(err))
 		} else {
 			log.Infof("close connection %v", client)
@@ -692,12 +693,12 @@ func (s *Server) RegisterAndWait(wait bool) {
 func newRedisConn(addr string, timeout int, readSize int, writeSize int, auth string) (*redisconn.Conn, error) {
 	c, err := redisconn.NewConnectionWithSize(addr, timeout, readSize, writeSize)
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	if err = doAuth(c, auth); err != nil {
 		c.Close()
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	return c, nil
